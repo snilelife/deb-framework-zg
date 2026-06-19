@@ -21,6 +21,11 @@ targets:
       - path: bridges
       - path: include
         headerVisibility: public
+    dependencies:
+      - sdk: Foundation.framework
+      - sdk: UIKit.framework
+      - sdk: QuartzCore.framework
+      - sdk: CoreGraphics.framework
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.zg.predictionoverlay.framework
@@ -36,6 +41,16 @@ targets:
         GCC_PREPROCESSOR_DEFINITIONS:
           - "$(inherited)"
           - "ZG_PREDICTION_OVERLAY_ENABLE_CONSTRUCTOR=1"
+        OTHER_LDFLAGS:
+          - "$(inherited)"
+          - "-framework"
+          - "Foundation"
+          - "-framework"
+          - "UIKit"
+          - "-framework"
+          - "QuartzCore"
+          - "-framework"
+          - "CoreGraphics"
     info:
       path: generated/ZGPredictionOverlay-Info.plist
       properties:
@@ -50,6 +65,11 @@ targets:
       - path: bridges
       - path: include
         headerVisibility: public
+    dependencies:
+      - sdk: Foundation.framework
+      - sdk: UIKit.framework
+      - sdk: QuartzCore.framework
+      - sdk: CoreGraphics.framework
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.zg.predictionoverlaykit
@@ -64,6 +84,16 @@ targets:
         GCC_PREPROCESSOR_DEFINITIONS:
           - "$(inherited)"
           - "ZG_PREDICTION_OVERLAY_ENABLE_CONSTRUCTOR=0"
+        OTHER_LDFLAGS:
+          - "$(inherited)"
+          - "-framework"
+          - "Foundation"
+          - "-framework"
+          - "UIKit"
+          - "-framework"
+          - "QuartzCore"
+          - "-framework"
+          - "CoreGraphics"
     info:
       path: generated/Info.plist
       properties:
@@ -78,6 +108,11 @@ targets:
       - path: bridges
       - path: include
         headerVisibility: public
+    dependencies:
+      - sdk: Foundation.framework
+      - sdk: UIKit.framework
+      - sdk: QuartzCore.framework
+      - sdk: CoreGraphics.framework
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.zg.predictionoverlay
@@ -95,6 +130,16 @@ targets:
         GCC_PREPROCESSOR_DEFINITIONS:
           - "$(inherited)"
           - "ZG_PREDICTION_OVERLAY_ENABLE_CONSTRUCTOR=1"
+        OTHER_LDFLAGS:
+          - "$(inherited)"
+          - "-framework"
+          - "Foundation"
+          - "-framework"
+          - "UIKit"
+          - "-framework"
+          - "QuartzCore"
+          - "-framework"
+          - "CoreGraphics"
 schemes:
   ZGPredictionOverlayFramework:
     build:
