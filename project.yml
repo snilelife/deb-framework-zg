@@ -1,0 +1,110 @@
+name: ZGPredictionOverlayKit
+options:
+  minimumXcodeGenVersion: 2.42.0
+  deploymentTarget:
+    iOS: "13.0"
+settings:
+  base:
+    CLANG_CXX_LANGUAGE_STANDARD: "c++17"
+    CLANG_CXX_LIBRARY: "libc++"
+    GCC_ENABLE_CPP_EXCEPTIONS: "NO"
+    GCC_ENABLE_CPP_RTTI: "NO"
+    IPHONEOS_DEPLOYMENT_TARGET: "13.0"
+    PRODUCT_NAME: ZGPredictionOverlayKit
+    SWIFT_VERSION: "5.0"
+targets:
+  ZGPredictionOverlayFramework:
+    type: framework
+    platform: iOS
+    sources:
+      - path: src
+      - path: bridges
+      - path: include
+        headerVisibility: public
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.zg.predictionoverlay.framework
+        PRODUCT_NAME: ZGPredictionOverlay
+        DEFINES_MODULE: "YES"
+        MACH_O_TYPE: mh_dylib
+        SKIP_INSTALL: "NO"
+        BUILD_LIBRARY_FOR_DISTRIBUTION: "YES"
+        CODE_SIGNING_ALLOWED: "NO"
+        CODE_SIGNING_REQUIRED: "NO"
+        CODE_SIGN_IDENTITY: ""
+        DEVELOPMENT_TEAM: ""
+        GCC_PREPROCESSOR_DEFINITIONS:
+          - "$(inherited)"
+          - "ZG_PREDICTION_OVERLAY_ENABLE_CONSTRUCTOR=1"
+    info:
+      path: generated/ZGPredictionOverlay-Info.plist
+      properties:
+        CFBundleDisplayName: ZGPredictionOverlay
+        CFBundleShortVersionString: "1.0.0"
+        CFBundleVersion: "1"
+  ZGPredictionOverlayKit:
+    type: framework
+    platform: iOS
+    sources:
+      - path: src
+      - path: bridges
+      - path: include
+        headerVisibility: public
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.zg.predictionoverlaykit
+        DEFINES_MODULE: "YES"
+        MACH_O_TYPE: mh_dylib
+        SKIP_INSTALL: "NO"
+        BUILD_LIBRARY_FOR_DISTRIBUTION: "YES"
+        CODE_SIGNING_ALLOWED: "NO"
+        CODE_SIGNING_REQUIRED: "NO"
+        CODE_SIGN_IDENTITY: ""
+        DEVELOPMENT_TEAM: ""
+        GCC_PREPROCESSOR_DEFINITIONS:
+          - "$(inherited)"
+          - "ZG_PREDICTION_OVERLAY_ENABLE_CONSTRUCTOR=0"
+    info:
+      path: generated/Info.plist
+      properties:
+        CFBundleDisplayName: ZGPredictionOverlayKit
+        CFBundleShortVersionString: "1.0.0"
+        CFBundleVersion: "1"
+  ZGPredictionOverlay:
+    type: library.dynamic
+    platform: iOS
+    sources:
+      - path: src
+      - path: bridges
+      - path: include
+        headerVisibility: public
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.zg.predictionoverlay
+        PRODUCT_NAME: ZGPredictionOverlay
+        EXECUTABLE_PREFIX: ""
+        EXECUTABLE_EXTENSION: dylib
+        MACH_O_TYPE: mh_dylib
+        DYLIB_INSTALL_NAME_BASE: "@rpath"
+        LD_DYLIB_INSTALL_NAME: "@rpath/ZGPredictionOverlay.dylib"
+        SKIP_INSTALL: "NO"
+        CODE_SIGNING_ALLOWED: "NO"
+        CODE_SIGNING_REQUIRED: "NO"
+        CODE_SIGN_IDENTITY: ""
+        DEVELOPMENT_TEAM: ""
+        GCC_PREPROCESSOR_DEFINITIONS:
+          - "$(inherited)"
+          - "ZG_PREDICTION_OVERLAY_ENABLE_CONSTRUCTOR=1"
+schemes:
+  ZGPredictionOverlayFramework:
+    build:
+      targets:
+        ZGPredictionOverlayFramework: all
+  ZGPredictionOverlayKit:
+    build:
+      targets:
+        ZGPredictionOverlayKit: all
+  ZGPredictionOverlay:
+    build:
+      targets:
+        ZGPredictionOverlay: all
