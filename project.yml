@@ -17,8 +17,13 @@ targets:
     type: framework
     platform: iOS
     sources:
-      - path: src
-      - path: bridges
+      # IMPORTANT: list exact implementation files instead of `path: src`.
+      # This prevents Codemagic/XcodeGen from compiling old duplicate files such as
+      # src/ZGPredictionEngine.cpp together with src/ZGPookingEngine.cpp.
+      - path: src/ZGPookingOverlayController.mm
+      - path: src/ZGPookingEngine.cpp
+      - path: src/ZGPookingFrameScanner.cpp
+      - path: bridges/ZGPookingOverlayExports.mm
       - path: include
         headerVisibility: public
     dependencies:
