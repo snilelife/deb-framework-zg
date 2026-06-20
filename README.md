@@ -213,3 +213,10 @@ For non-guided Bank Shot mode, the ghost-ball point is calculated from the chose
 ## Important
 
 A `.dylib` or dynamic framework will not run inside an app by itself. The host app must link it or explicitly load it from its own source code. This package intentionally does not include injection or binary patching.
+
+
+## Codemagic linker fix in this package
+
+This package links the dynamic framework target against the iOS SDK frameworks used by the Objective-C/UIKit overlay code: Foundation, UIKit, CoreGraphics, and QuartzCore. Without these links, Codemagic fails at `Ld ... ZGPookingOverlayKit.framework` with undefined symbols such as `_OBJC_CLASS_$_UIView`, `_OBJC_CLASS_$_UIColor`, `_UIGraphicsGetCurrentContext`, and `_UIApplicationDidFinishLaunchingNotification`.
+
+It also includes `include/ZGPookingOverlayKit.h` as an umbrella header so `DEFINES_MODULE=YES` can generate a clean module map.

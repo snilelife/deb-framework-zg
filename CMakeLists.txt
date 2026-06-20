@@ -30,5 +30,5 @@ set_target_properties(ZGPookingOverlayKit PROPERTIES
     FRAMEWORK TRUE
     FRAMEWORK_VERSION A
     MACOSX_FRAMEWORK_IDENTIFIER com.zg.pookingoverlaykit
-    PUBLIC_HEADER "include/ZGPookingOverlayController.h;include/ZGPookingOverlayExports.h;include/ZGPookingEngine.hpp;include/ZGPookingFrameScanner.hpp;include/ZGOverlayTypes.hpp"
+    PUBLIC_HEADER "include/ZGPookingOverlayKit.h;include/ZGPookingOverlayController.h;include/ZGPookingOverlayExports.h;include/ZGPookingEngine.hpp;include/ZGPookingFrameScanner.hpp;include/ZGOverlayTypes.hpp"
 )
