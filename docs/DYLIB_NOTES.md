@@ -3,22 +3,24 @@
 On iOS, the easiest legal packaging is a dynamic framework:
 
 ```text
-ZGPredictionOverlayKit.framework/ZGPredictionOverlayKit
+ZGPookingOverlayKit.framework/ZGPookingOverlayKit
 ```
 
-The inner `ZGPredictionOverlayKit` binary is a Mach-O dynamic library. A host app can embed and link that framework when it is built from source.
+The inner `ZGPookingOverlayKit` binary is a Mach-O dynamic library. A host app can embed and link that framework when it is built from source.
 
-The manual framework target intentionally does not include:
+This kit intentionally does not include:
 
 ```text
+injection
 binary patching
+auto-load tricks
 third-party app hooks
 ```
 
 Expected integration model:
 
 ```text
-host app source -> links framework -> calls [ZGPredictionOverlayController startInWindow:]
+host app source -> links framework -> calls [ZGPookingOverlayController startInWindow:]
 ```
 
 Build options:
@@ -32,23 +34,19 @@ Build options:
 The public entry point is:
 
 ```objc
-#import "ZGPredictionOverlayController.h"
+#import "ZGPookingOverlayController.h"
 
-[ZGPredictionOverlayController startInWindow:self.window];
+[ZGPookingOverlayController startInWindow:self.window];
 ```
 
-For a dylib-style build, `bridges/ZGPredictionOverlayExports.mm` also provides exported C symbols:
+Starting the overlay does not enable prediction lines. The default settings keep `predictionEnabled` off, so the user must tap `OVERLAY ON` in the menu or the host app must apply settings with `predictionEnabled = YES`.
+
+For a dylib-style build, `bridges/ZGPookingOverlayExports.mm` also provides exported C symbols:
 
 ```objc
-ZGPredictionOverlayStartInWindow(window);
-ZGPredictionOverlayUpdateTable(table, cue, YES, balls, ballCount, guide);
-ZGPredictionOverlayStop();
+ZGPookingOverlayStartInWindow(window);
+ZGPookingOverlayUpdateTable(table, cue, YES, balls, ballCount, guide);
+ZGPookingOverlayStop();
 ```
 
-The `ZGPredictionOverlay.dylib` target additionally compiles `src/ZGPredictionOverlayAutoStart.mm` with its constructor enabled. When that dylib is intentionally loaded by your own signed app, it waits for a foreground `UIWindow` and starts the overlay automatically.
-
-For packaging details, see:
-
-```text
-docs/AUTOSTART_DYLIB_AND_DEB.md
-```
+Those exports are only an easier call surface. They do not auto-load the overlay; the host app still starts it intentionally.

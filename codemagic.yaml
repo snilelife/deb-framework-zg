@@ -1,6 +1,6 @@
 workflows:
-  build-ios-overlay-packages:
-    name: Build ZGPredictionOverlay dylib/framework packages
+  build-ios-dynamic-framework:
+    name: Build ZGPookingOverlayKit dynamic framework
     max_build_duration: 30
     instance_type: mac_mini_m2
     environment:
@@ -17,30 +17,14 @@ workflows:
           set -euo pipefail
           chmod +x scripts/build_ios_framework.sh
           scripts/build_ios_framework.sh
-      - name: Build auto-start dylib
+      - name: Package artifact
         script: |
           set -euo pipefail
-          chmod +x scripts/build_ios_dylib.sh
-          scripts/build_ios_dylib.sh
-      - name: Package zip artifacts
-        script: |
-          set -euo pipefail
-          chmod +x scripts/package_artifacts.sh
-          scripts/package_artifacts.sh
-      - name: Optional deb package
-        script: |
-          set -euo pipefail
-          if [ -n "${ZG_TARGET_BUNDLE_ID:-}" ]; then
-            brew install dpkg || true
-            chmod +x scripts/package_deb.sh
-            scripts/package_deb.sh "$ZG_TARGET_BUNDLE_ID"
-          else
-            echo "Skipping .deb. Set ZG_TARGET_BUNDLE_ID to build one."
-          fi
+          mkdir -p artifacts
+          FRAMEWORK_PATH=$(find build/Build/Products/Release-iphoneos -maxdepth 1 -name "ZGPookingOverlayKit.framework" -type d | head -n 1)
+          test -d "$FRAMEWORK_PATH"
+          (cd "$(dirname "$FRAMEWORK_PATH")" && zip -qry "$CM_BUILD_DIR/artifacts/ZGPookingOverlayKit.framework.zip" ZGPookingOverlayKit.framework)
           ls -lh artifacts
     artifacts:
-      - artifacts/*.zip
-      - artifacts/*.deb
-      - build/Release-iphoneos/ZGPredictionOverlay.dylib
-      - build/Build/Products/Release-iphoneos/ZGPredictionOverlay.framework
-      - build/Build/Products/Release-iphoneos/ZGPredictionOverlayKit.framework
+      - artifacts/ZGPookingOverlayKit.framework.zip
+      - build/Build/Products/Release-iphoneos/ZGPookingOverlayKit.framework

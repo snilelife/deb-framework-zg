@@ -1,58 +1,35 @@
-# ZGPredictionOverlayKit
+# ZGPookingOverlayKit
 
-Drop-in prediction overlay module with two supported package forms:
+Clean drop-in overlay module for a host app that intentionally starts it. This version is tuned for Pooking / `com.pool.club.billiards.city` style aim lines.
+
+This package is designed to build as a dynamic iOS framework. The framework binary is a dylib-style Mach-O inside:
 
 ```text
-ZGPredictionOverlay.dylib
-  Auto-start dylib for your own signed app. When the app loads the dylib, the overlay waits for a UIKit window and starts.
-
-ZGPredictionOverlay.framework
-  Auto-start dynamic framework zip for signers that require a .zip containing a .framework folder.
-
-ZGPredictionOverlayKit.framework
-  Manual dynamic framework for source-owned app integration. The host app calls the public API.
+ZGPookingOverlayKit.framework/ZGPookingOverlayKit
 ```
 
-The overlay itself is the same in both forms: floating `ZG` menu, cue line, pocket/object path, bank/bounce paths, ghost ball, detected ball markers, centerlines, route/style cycling, manual pocket selection, bounce count, and line length controls.
+It does not contain injection, loader, tweak, or auto-start code. The host app must call the public API.
+
+Prediction lines are OFF by default. Starting the overlay only shows the draggable menu bubble. Lines appear after the menu `OVERLAY ON` toggle is tapped or after the host applies settings with `predictionEnabled = YES`.
 
 ## Files
 
 ```text
-include/ZGPredictionOverlayController.h   Objective-C public API
-include/ZGPredictionOverlayExports.h      Exported helper function prototypes
-include/ZGPredictionEngine.hpp            C++ prediction engine API
+include/ZGPookingOverlayController.h   Objective-C public API
+include/ZGPookingOverlayExports.h      Exported helper function prototypes
+include/ZGPookingEngine.hpp            C++ prediction engine API
+include/ZGPookingFrameScanner.hpp      Optional RGBA/BGRA frame scanner API
 include/ZGOverlayTypes.hpp                C++ data types
-src/ZGPredictionOverlayController.mm      UIKit menu + overlay renderer
-src/ZGPredictionOverlayAutoStart.mm       Auto-start window attach layer for dylib builds
-src/ZGPredictionEngine.cpp                Aim prediction engine
-bridges/ZGPredictionOverlayExports.mm     Exported C ABI helpers for dylib/framework builds
-project.yml                               XcodeGen auto-framework + manual-framework + dylib project
-CMakeLists.txt                            CMake auto-framework + manual-framework + dylib targets
-scripts/build_ios_dylib.sh                Raw auto-start dylib build helper
+src/ZGPookingOverlayController.mm      UIKit menu + overlay renderer
+src/ZGPookingEngine.cpp                Aim prediction engine
+src/ZGPookingFrameScanner.cpp          Host-fed frame scanner
+bridges/ZGPookingOverlayExports.mm     Exported C ABI helpers for dylib/framework builds
+project.yml                               XcodeGen dynamic framework project
+CMakeLists.txt                            CMake dynamic framework target
 scripts/build_ios_framework.sh            Xcode build helper
-scripts/package_deb.sh                    Substrate-style deb package helper
-scripts/package_artifacts.sh              Zip helper for dylib/framework/bundle outputs
 examples/HostAppUsage.mm                  Minimal integration example
 cocos2dx/                                 Optional Cocos2d-x adapter source
 ```
-
-## Build Auto-Start Dylib
-
-This is the main artifact for an IPA signer that supports adding and loading a dylib:
-
-```bash
-sudo xcode-select -s /Applications/Xcode.app
-chmod +x scripts/build_ios_dylib.sh
-scripts/build_ios_dylib.sh
-```
-
-Output:
-
-```text
-build/Release-iphoneos/ZGPredictionOverlay.dylib
-```
-
-Once your signer loads that dylib into your own app, the constructor runs and starts the overlay with the app.
 
 ## Build Dynamic Framework
 
@@ -69,55 +46,20 @@ The build output is under:
 build/Build/Products/Release-iphoneos/
 ```
 
-To create a zip:
-
-```bash
-scripts/package_artifacts.sh
-```
-
-Output:
-
-```text
-artifacts/ZGPredictionOverlayKit.framework.zip
-```
-
-For the signer screen that says it expects a zip containing a `.framework` or `.bundle` folder, use:
-
-```text
-artifacts/ZGPredictionOverlay.framework.zip
-```
-
-That is the auto-start framework. Do not upload the full source kit zip to the signer.
-
-## Build Deb
-
-Build the dylib first, then package for your app bundle id:
-
-```bash
-scripts/build_ios_dylib.sh
-scripts/package_deb.sh com.yourcompany.yourapp
-```
-
-Output:
-
-```text
-artifacts/ZGPredictionOverlay_1.0.0_iphoneos-arm64.deb
-```
-
 ## Host App Start Call
 
 In the host app source:
 
 ```objc
-#import "ZGPredictionOverlayController.h"
+#import "ZGPookingOverlayController.h"
 
-[ZGPredictionOverlayController startInWindow:self.window];
+[ZGPookingOverlayController startInWindow:self.window];
 ```
 
-Then feed live table geometry whenever the cue/balls/guide line changes:
+Then feed live table geometry whenever the cue/balls/guide line changes. This can happen while prediction is still OFF; the renderer will stay blank until enabled.
 
 ```objc
-[ZGPredictionOverlayController updateTable:table
+[ZGPookingOverlayController updateTable:table
                                    cueBall:cue
                                 hasCueBall:YES
                                      balls:balls
@@ -129,29 +71,128 @@ The overlay recomputes immediately on every `updateTable(...)` call. This clean 
 
 ## Exported Dylib-Friendly Functions
 
-`include/ZGPredictionOverlayExports.h` and `bridges/ZGPredictionOverlayExports.mm` expose simple exported symbols:
+`include/ZGPookingOverlayExports.h` and `bridges/ZGPookingOverlayExports.mm` expose simple exported symbols:
 
 ```objc
-#import "ZGPredictionOverlayExports.h"
+#import "ZGPookingOverlayExports.h"
 
-ZGPredictionOverlayStartInWindow(window);
-ZGPredictionOverlayStartInView(view);
-ZGPredictionOverlayStop();
-ZGPredictionOverlaySetVisible(YES);
-ZGPredictionOverlayUpdateTable(table, cue, YES, balls, ballCount, guide);
-ZGPredictionOverlayAutoAttachNow();
-ZGPredictionOverlayAutoStartSetEnabled(YES);
+ZGPookingOverlayStartInWindow(window);
+ZGPookingOverlayStartInView(view);
+ZGPookingOverlayStop();
+ZGPookingOverlaySetVisible(YES);
+ZGPookingOverlayUpdateTable(table, cue, YES, balls, ballCount, guide);
+ZGPookingOverlayUpdateFromFrameBytes(bytes, width, height, bytesPerRow, ZGPookingPixelFormatBGRA8888);
+NSUInteger hiddenCount = ZGPookingOverlayHiddenLineCount();
+ZGOverlayLine hiddenLines[32];
+NSUInteger copied = ZGPookingOverlayCopyHiddenLines(hiddenLines, 32);
 ```
 
-These are included in both dynamic outputs and are useful from mixed Objective-C++ code in your own host app.
+These are included in the dynamic framework target and are useful if you later build the same source as a `.dylib` or call it from mixed Objective-C++ code in your own host app.
+
+## Frame Scanner
+
+The scanner path is optional. It does not record the screen by itself. The host app must pass frame bytes it already owns:
+
+```objc
+BOOL ok = ZGPookingOverlayUpdateFromFrameBytes(bytes,
+                                               width,
+                                               height,
+                                               bytesPerRow,
+                                               ZGPookingPixelFormatBGRA8888);
+```
+
+The scanner estimates the Pooking table area, cue ball, visible balls, and the bright/cyan/violet on-screen guide line, then feeds the prediction engine. Best accuracy still comes from direct game geometry; frame scanning is a fallback when geometry is not available.
+
+## Dynamic Guide Solver
+
+When the host supplies `guide.valid = YES`, or when the frame scanner detects the visible Pooking guide line, the engine uses the guide direction to pick the contacted ball, calculate the ghost-ball position, then recompute:
+
+```text
+1. cue/ghost guide line
+2. object-to-target line, where the target is a pocket or a bank rail contact
+3. cue-after-hit / carom line
+4. bank / bounce line
+```
+
+Moving the guide endpoint changes the selected contact, pocket path, carom path, and bank path on the next `updateTable(...)` call.
+Guide-driven shots compute the ghost-ball impact point from the aim ray offset, so thin hits, full hits, and cue-after-hit paths change with where the guide crosses the object ball.
+In Bank Shot mode the guide-driven solver follows the current aim angle through multiple rail contacts, then draws the pocket leg from the final rail point.
+
+Hidden lines are recorded with roles:
+
+```text
+CueGuide
+ObjectPath
+GhostContact
+CaromPath
+BankPath
+BouncePath
+CollisionWarning
+CenterLine
+```
+
+The scanner regression test draws two Pooking-like frames with different guide angles and verifies that the detected guide endpoint and cue prediction line both move:
+
+```bash
+clang++ -std=c++17 -Iinclude tests/pooking_scanner_engine_test.cpp src/ZGPookingFrameScanner.cpp src/ZGPookingEngine.cpp -o /tmp/pooking_scanner_engine_test
+/tmp/pooking_scanner_engine_test
+```
+
+The engine mode regression test verifies four-line output and hidden recording across every style/mode combination, plus guide movement, object-path movement, cue-after-hit movement, finite geometry, bank rail targeting, multi-rail bank chaining, and blocked-lane avoidance:
+
+```bash
+clang++ -std=c++17 -Iinclude tests/pooking_engine_modes_test.cpp src/ZGPookingEngine.cpp -o /tmp/pooking_engine_modes_test
+/tmp/pooking_engine_modes_test
+```
+
+The stabilizer regression test verifies that scanner-fed guide jitter is smoothed while real aim changes still snap immediately:
+
+```bash
+clang++ -std=c++17 -Iinclude tests/pooking_stabilizer_test.cpp src/ZGPookingFrameScanner.cpp src/ZGPookingEngine.cpp -o /tmp/pooking_stabilizer_test
+/tmp/pooking_stabilizer_test
+```
+
+## Shot Solver
+
+The prediction engine now scores candidate shots using:
+
+```text
+guide-line alignment
+aim-ray ghost-ball contact point
+cue-to-object lane clearance
+object-to-pocket lane clearance
+bank-rail lane clearance
+one-rail and two-rail indirect bank alternatives
+post-impact cue-ball tangent / stop prediction
+long-shot distance preference
+carom continuation path
+blocked-lane penalties
+```
+
+This keeps the guide-driven line responsive while making Auto, Long, Carom, and Bank modes prefer cleaner paths instead of simply picking the closest ball.
+For non-guided Bank Shot mode, the ghost-ball point is calculated from the chosen rail contact instead of the final pocket, so suggested bank shots are no longer scored as direct shots. Hidden line recording keeps the alternate one-rail and two-rail bank routes for later comparison.
 
 ## Menu Features
 
 - Draggable `ZG` bubble.
 - Overlay ON/OFF.
+- Floating `AIM ON/OFF` quick button.
+- Movable menu panel.
+- Pooking aim ladder ON/OFF.
+- Four-line prediction pack ON/OFF.
+- Hidden line recording ON/OFF.
+- Scanner smoothing ON/OFF.
 - Cue prediction line ON/OFF.
 - Pocket/object path ON/OFF.
 - Bank/bounce paths ON/OFF.
+- Carom path ON/OFF.
+- Collision/block warning ON/OFF.
+- Pocket heat/ring markers ON/OFF.
+- Shot mode cycling:
+  - Auto
+  - Long Shot
+  - Carom Shot
+  - Bank Shot
 - Route cycling:
   - Auto Hybrid
   - Guide Lock
@@ -171,10 +212,4 @@ These are included in both dynamic outputs and are useful from mixed Objective-C
 
 ## Important
 
-A `.dylib` or dynamic framework will not run inside an app by itself. Your app/signing flow must actually load it. This package provides the auto-start overlay code inside the dylib; it does not patch binaries or bypass app security.
-
-Detailed packaging notes are in:
-
-```text
-docs/AUTOSTART_DYLIB_AND_DEB.md
-```
+A `.dylib` or dynamic framework will not run inside an app by itself. The host app must link it or explicitly load it from its own source code. This package intentionally does not include injection or binary patching.

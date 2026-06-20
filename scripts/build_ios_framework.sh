@@ -9,32 +9,23 @@ if ! command -v xcodegen >/dev/null 2>&1; then
   exit 1
 fi
 
-rm -rf build generated ZGPredictionOverlayKit.xcodeproj
+rm -rf build generated ZGPookingOverlayKit.xcodeproj
 mkdir -p generated build
 
 xcodegen generate --spec project.yml
 
-for SCHEME in ZGPredictionOverlayFramework ZGPredictionOverlayKit; do
-  xcodebuild \
-    -project ZGPredictionOverlayKit.xcodeproj \
-    -scheme "$SCHEME" \
-    -configuration Release \
-    -sdk iphoneos \
-    -destination 'generic/platform=iOS' \
-    -derivedDataPath build \
-    build \
-    CODE_SIGNING_ALLOWED=NO \
-    CODE_SIGNING_REQUIRED=NO \
-    CODE_SIGN_IDENTITY="" \
-    DEVELOPMENT_TEAM=""
-done
+xcodebuild \
+  -project ZGPookingOverlayKit.xcodeproj \
+  -scheme ZGPookingOverlayKit \
+  -configuration Release \
+  -sdk iphoneos \
+  -destination 'generic/platform=iOS' \
+  -derivedDataPath build \
+  clean build \
+  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGNING_REQUIRED=NO \
+  CODE_SIGN_IDENTITY="" \
+  DEVELOPMENT_TEAM=""
 
 echo "Built products:"
 find build/Build/Products/Release-iphoneos -maxdepth 2 -print
-
-echo
-echo "Use this signer-ready framework zip after running scripts/package_artifacts.sh:"
-echo "  artifacts/ZGPredictionOverlay.framework.zip"
-echo
-echo "For the auto-start raw dylib, run:"
-echo "  scripts/build_ios_dylib.sh"
